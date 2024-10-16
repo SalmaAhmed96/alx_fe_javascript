@@ -1,7 +1,17 @@
-let quotes = [
-  { text: "The only limit to our realization of tomorrow is our doubts of today.", category: "Inspiration" },
-  { text: "Life is 10% what happens to us and 90% how we react to it.", category: "Life" }
-];
+let quotes = [];
+
+
+function loadQuotes() {
+  const savedQuotes = localStorage.getItem('quotes');
+  if (savedQuotes) {
+    quotes = JSON.parse(savedQuotes);
+  }
+}
+
+
+function saveQuotes() {
+  localStorage.setItem('quotes', JSON.stringify(quotes));
+}
 
 
 function showRandomQuote() {
@@ -33,7 +43,7 @@ function addQuote() {
     document.getElementById('newQuoteCategory').value = '';
     alert('Quote added successfully!');
 
-
+    saveQuotes();
     populateCategories();
     filterQuotes();
   } else {
@@ -105,9 +115,35 @@ function loadSelectedFilter() {
 }
 
 
+function exportToJsonFile() {
+  const jsonData = JSON.stringify(quotes);
+  const blob = new Blob([jsonData], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  a.setAttribute('download', 'quotes.json');
+  a.click();
+}
+
+
+function importFromJsonFile(event) {
+  const fileReader = new FileReader();
+  fileReader.onload = function (event) {
+    const importedQuotes = JSON.parse(event.target.result);
+    quotes.push(...importedQuotes);
+    saveQuotes();
+    alert('Quotes imported successfully!');
+    populateCategories();
+    filterQuotes();
+  };
+  fileReader.readAsText(event.target.files[0]);
+}
+
+
 createAddQuoteForm();
 populateCategories();
 loadSelectedFilter();
+loadQuotes();
 
 
 showRandomQuote();
