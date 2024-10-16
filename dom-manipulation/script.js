@@ -14,6 +14,19 @@ function saveQuotes() {
 }
 
 
+async function postQuoteToServer(quote) {
+  const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(quote)
+  });
+  const data = await response.json();
+  console.log('Quote posted to server:', data);
+}
+
+
 async function fetchQuotesFromServer() {
   const response = await fetch('https://jsonplaceholder.typicode.com/posts');
   const serverQuotes = await response.json();
@@ -23,12 +36,12 @@ async function fetchQuotesFromServer() {
 
 function setupPeriodicFetching(interval) {
   setInterval(async () => {
-    await syncWithServer();
+    await syncQuotes();
   }, interval);
 }
 
 
-async function syncWithServer() {
+async function syncQuotes() {
   const serverQuotes = await fetchQuotesFromServer();
 
 
@@ -64,7 +77,8 @@ function addQuote() {
   const newQuoteCategory = document.getElementById('newQuoteCategory').value;
 
   if (newQuoteText && newQuoteCategory) {
-    quotes.push({ text: newQuoteText, category: newQuoteCategory });
+    const newQuote = { text: newQuoteText, category: newQuoteCategory };
+    quotes.push(newQuote);
     console.log(quotes);
 
 
@@ -73,6 +87,7 @@ function addQuote() {
     alert('Quote added successfully!');
 
     saveQuotes();
+    postQuoteToServer(newQuote);
     populateCategories();
     filterQuotes();
   } else {
