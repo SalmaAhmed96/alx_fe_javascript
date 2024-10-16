@@ -52,14 +52,8 @@ async function syncQuotes() {
     document.getElementById('conflictNotification').style.display = 'block';
     populateCategories();
     filterQuotes();
-
-
-    setTimeout(() => {
-      document.getElementById('conflictNotification').style.display = 'none';
-    }, 3000);
   }
 }
-
 
 
 function showRandomQuote() {
@@ -107,5 +101,94 @@ function createAddQuoteForm() {
 
   const quoteInput = document.createElement('input');
   quoteInput.id = 'newQuoteText';
-  quoteInput
+  quoteInput.type = 'text';
+  quoteInput.placeholder = 'Enter a new quote';
+
+  const categoryInput = document.createElement('input');
+  categoryInput.id = 'newQuoteCategory';
+  categoryInput.type = 'text';
+  categoryInput.placeholder = 'Enter quote category';
+
+  const addButton = document.createElement('button');
+  addButton.innerText = 'Add Quote';
+  addButton.onclick = addQuote;
+
+  formDiv.appendChild(quoteInput);
+  formDiv.appendChild(categoryInput);
+  formDiv.appendChild(addButton);
+
+  document.body.appendChild(formDiv);
 }
+
+
+function populateCategories() {
+  const categoryFilter = document.getElementById('categoryFilter');
+  categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+
+  const categories = [...new Set(quotes.map(quote => quote.category))];
+  categories.forEach(category => {
+    const option = document.createElement('option');
+    option.value = category;
+    option.textContent = category;
+    categoryFilter.appendChild(option);
+  });
+}
+
+
+function filterQuotes() {
+  const selectedCategory = document.getElementById('categoryFilter').value;
+  const quoteDisplay = document.getElementById('quoteDisplay');
+
+  if (selectedCategory === 'all') {
+    quoteDisplay.innerHTML = quotes.map(quote => `<p>${quote.text}</p><p><em>${quote.category}</em></p>`).join('');
+  } else {
+    const filteredQuotes = quotes.filter(quote => quote.category === selectedCategory);
+    quoteDisplay.innerHTML = filteredQuotes.map(quote => `<p>${quote.text}</p><p><em>${quote.category}</em></p>`).join('');
+  }
+
+  localStorage.setItem('selectedCategory', selectedCategory);
+}
+
+
+function loadSelectedFilter() {
+  const savedCategory = localStorage.getItem('selectedCategory');
+  if (savedCategory) {
+    document.getElementById('categoryFilter').value = savedCategory;
+    filterQuotes();
+  }
+}
+
+
+function exportToJsonFile() {
+  const jsonData = JSON.stringify(quotes);
+  const blob = new Blob([jsonData], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  a.setAttribute('download', 'quotes.json');
+  a.click();
+}
+
+
+function importFromJsonFile(event) {
+  const fileReader = new FileReader();
+  fileReader.onload = function (event) {
+    const importedQuotes = JSON.parse(event.target.result);
+    quotes.push(...importedQuotes);
+    saveQuotes();
+    alert('Quotes imported successfully!');
+    populateCategories();
+    filterQuotes();
+  };
+  fileReader.readAsText(event.target.files[0]);
+}
+
+
+createAddQuoteForm();
+populateCategories();
+loadSelectedFilter();
+loadQuotes();
+setupPeriodicFetching(300000);
+
+
+showRandomQuote();
