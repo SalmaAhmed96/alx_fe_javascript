@@ -44,12 +44,14 @@ function setupPeriodicFetching(interval) {
 async function syncQuotes() {
   const serverQuotes = await fetchQuotesFromServer();
 
-
   const newQuotes = serverQuotes.filter(serverQuote => !quotes.some(localQuote => localQuote.text === serverQuote.text));
   if (newQuotes.length > 0) {
     quotes.push(...newQuotes);
     saveQuotes();
     document.getElementById('conflictNotification').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('conflictNotification').style.display = 'none';
+    }, 5000);
     populateCategories();
     filterQuotes();
   }
@@ -80,7 +82,6 @@ function addQuote() {
     const newQuote = { text: newQuoteText, category: newQuoteCategory };
     quotes.push(newQuote);
     console.log(quotes);
-
 
     document.getElementById('newQuoteText').value = '';
     document.getElementById('newQuoteCategory').value = '';
