@@ -145,5 +145,4 @@ populateCategories();
 loadSelectedFilter();
 loadQuotes();
 
-
 showRandomQuote();
