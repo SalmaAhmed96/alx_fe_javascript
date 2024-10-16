@@ -14,6 +14,35 @@ function saveQuotes() {
 }
 
 
+async function fetchQuotesFromServer() {
+  const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+  const serverQuotes = await response.json();
+  return serverQuotes.map(quote => ({ text: quote.title, category: 'Server' }));
+}
+
+
+function setupPeriodicFetching(interval) {
+  setInterval(async () => {
+    await syncWithServer();
+  }, interval);
+}
+
+
+async function syncWithServer() {
+  const serverQuotes = await fetchQuotesFromServer();
+
+
+  const newQuotes = serverQuotes.filter(serverQuote => !quotes.some(localQuote => localQuote.text === serverQuote.text));
+  if (newQuotes.length > 0) {
+    quotes.push(...newQuotes);
+    saveQuotes();
+    document.getElementById('conflictNotification').style.display = 'block';
+    populateCategories();
+    filterQuotes();
+  }
+}
+
+
 function showRandomQuote() {
   if (quotes.length === 0) {
     const quoteDisplay = document.getElementById('quoteDisplay');
@@ -144,5 +173,7 @@ createAddQuoteForm();
 populateCategories();
 loadSelectedFilter();
 loadQuotes();
+setupPeriodicFetching(300000);
+
 
 showRandomQuote();
