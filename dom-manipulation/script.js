@@ -61,6 +61,7 @@ async function syncQuotes() {
 }
 
 
+
 function showRandomQuote() {
   if (quotes.length === 0) {
     const quoteDisplay = document.getElementById('quoteDisplay');
